@@ -20,6 +20,13 @@
 # Inspired by Chain Of Responsibility Design Pattern | Python Example at https://www.youtube.com/watch?v=QOW1IN8i8J8  and Refactoring a 500-Line Method with the Pipeline Pattern
 # https://www.youtube.com/watch?v=RfknMfzTUbo&t=496s
 #
+# Updates:
+#
+# Author  - Date - Note:
+# Ronn - 2024-06-10: Initial version.
+# Ronn - 2024-06-26: Added logging and charting.
+# Ronn - 2026-07-19: Ensure Account is int64 after coercion.
+
 
 from __future__ import annotations
 import datetime
@@ -38,7 +45,7 @@ from matplotlib.ticker import FuncFormatter
 # Some constants for logging and versioning.
 
 LOG_FORMAT: str = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-LAST_UPDATED: str = "2024-06-26 17:50:00Z"
+LAST_UPDATED: str = "2026-07-19 21:34:00Z"
 
 
 def configure_logging(
@@ -186,6 +193,8 @@ class BronzeHandler(Handler):
             # Drop rows with non-numeric values in Account and BilledAmount columns.
             df["Account"] = pd.to_numeric(df["Account"], errors="coerce")
             df.dropna(subset=["Account"], inplace=True)
+            df["Account"] = df["Account"].astype("int64")  # Ronn - 2026-07-19: Ensure Account is int64 after coercion
+
 
             df["BilledAmount"] = pd.to_numeric(df["BilledAmount"], errors="coerce")
             df.dropna(subset=["BilledAmount"], inplace=True)
@@ -476,7 +485,13 @@ def main(source_file: str = "source.csv") -> None:
     """
     configure_logging(level=logging.INFO, log_file="pipeline.log")
 
+
     logger.info(f"Starting medallion pipeline with {Path(__file__).name} last updated {LAST_UPDATED}")
+
+    cwd = os.getcwd()
+    logger.info("Current working directory: %s", cwd)
+    print(f"Current working directory: {cwd}")
+
     logger.info("Source file: %s", source_file)
 
     pipeline = build_chain()
